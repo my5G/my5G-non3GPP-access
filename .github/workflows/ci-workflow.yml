@@ -19,24 +19,13 @@ jobs:
         with:
           go-version: 1.14.7
 
-      - name: Install Go Deps
-        run: |
-          go mod download
-          sudo ln -s $GOROOT /usr/local/go
-
-      - name: Packages Control Plane
-        run: |
-          sudo apt -y -q update
-          sudo apt -y -q install wget git
-
-      - name: Packages User Plane
-        run: |
-          sudo apt -y update
-          sudo apt -y install git gcc cmake autoconf libtool pkg-config libmnl-dev libyaml-dev
-          go get -u github.com/sirupsen/logrus
+#      - name: Install Go Deps
+#        run: |
+#          go mod download
+#          sudo ln -s $GOROOT /usr/local/go
 
       - name: Build
-        run: go build -o ue-iot-non3gpp -x ./ue.go
+        run: echo "Build UE here"
 
       - name: Test
         run: echo "Implement Test here"
