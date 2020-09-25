@@ -9,10 +9,11 @@ import (
 	"free5gc/lib/nas/nasMessage"
 	"free5gc/lib/nas/nasTestpacket"
 	"free5gc/lib/nas/nasType"
+	"free5gc/lib/nas/security"
 	"free5gc/lib/openapi/models"
-	"free5gc/src/n3iwf/n3iwf_context"
-	"free5gc/src/n3iwf/n3iwf_ike/ike_handler"
-	"free5gc/src/n3iwf/n3iwf_ike/ike_message"
+	n3iwf_context "free5gc/src/n3iwf/context"
+	ike_handler "free5gc/src/n3iwf/ike/handler"
+	ike_message "free5gc/src/n3iwf/ike/message"
 	"github.com/sirupsen/logrus"
 	"hash"
 	"math/big"
@@ -740,7 +741,8 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	eapVendorTypeData = append(eapVendorTypeData, anParameters...)
 
 	// NAS
-	registrationRequest := nasTestpacket.GetRegistrationRequestWith5GMM(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil)
+	ueSecurityCapability := setUESecurityCapability(ue)
+	registrationRequest := nasTestpacket.GetRegistrationRequestWith5GMM(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil, ueSecurityCapability)
 
 	nasLength := make([]byte, 2)
 	binary.BigEndian.PutUint16(nasLength, uint16(len(registrationRequest)))
@@ -1332,4 +1334,35 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 
 	pingLog.Infoln("Keep proccess active for 5 hours...")
 	time.Sleep(5 * time.Hour)
+}
+
+func setUESecurityCapability(ue *UeRanContext) (UESecurityCapability *nasType.UESecurityCapability) {
+	UESecurityCapability = &nasType.UESecurityCapability{
+		Iei:    nasMessage.RegistrationRequestUESecurityCapabilityType,
+		Len:    8,
+		Buffer: []uint8{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+	}
+	switch ue.CipheringAlg {
+	case security.AlgCiphering128NEA0:
+		UESecurityCapability.SetEA0_5G(1)
+	case security.AlgCiphering128NEA1:
+		UESecurityCapability.SetEA1_128_5G(1)
+	case security.AlgCiphering128NEA2:
+		UESecurityCapability.SetEA2_128_5G(1)
+	case security.AlgCiphering128NEA3:
+		UESecurityCapability.SetEA3_128_5G(1)
+	}
+
+	switch ue.IntegrityAlg {
+	case security.AlgIntegrity128NIA0:
+		UESecurityCapability.SetIA0_5G(1)
+	case security.AlgIntegrity128NIA1:
+		UESecurityCapability.SetIA1_128_5G(1)
+	case security.AlgIntegrity128NIA2:
+		UESecurityCapability.SetIA2_128_5G(1)
+	case security.AlgIntegrity128NIA3:
+		UESecurityCapability.SetIA3_128_5G(1)
+	}
+
+	return
 }

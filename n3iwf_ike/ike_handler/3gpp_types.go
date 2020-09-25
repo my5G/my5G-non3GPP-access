@@ -6,7 +6,7 @@ import (
 
 	"free5gc/lib/aper"
 	"free5gc/lib/ngap/ngapType"
-	ike_message "free5gc/src/n3iwf/ike/message"
+	"free5gc/src/n3iwf/n3iwf_ike/ike_message"
 )
 
 // 3GPP specified EAP-5G

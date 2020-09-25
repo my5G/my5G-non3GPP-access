@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"free5gc/lib/http2_util"
 	"free5gc/lib/path_util"
-	"free5gc/src/app"
 	"free5gc/src/ue/factory"
 	"free5gc/src/ue/logger"
 	"free5gc/src/ue/rest_api"
@@ -68,16 +67,20 @@ func (*UE) Initialize(c *cli.Context) {
 		factory.InitConfigFactory(ue_util.DefaultUeConfigPath)
 	}
 
-	initLog.Traceln("UE debug level(string):", app.ContextSelf().Logger.UE.DebugLevel)
-	if app.ContextSelf().Logger.UE.DebugLevel != "" {
-		initLog.Infoln("UE debug level(string):", app.ContextSelf().Logger.UE.DebugLevel)
-		level, err := logrus.ParseLevel(app.ContextSelf().Logger.UE.DebugLevel)
+	// TODO: get these two variables from ue-iot-non3gpp config file
+	DebugLevel:= "info"
+	ReportCaller := true
+
+	initLog.Traceln("UE debug level(string):", DebugLevel)
+	if DebugLevel != "" {
+		initLog.Infoln("UE debug level(string):", DebugLevel)
+		level, err := logrus.ParseLevel(DebugLevel)
 		if err == nil {
 			logger.SetLogLevel(level)
 		}
 	}
 
-	logger.SetReportCaller(app.ContextSelf().Logger.UE.ReportCaller)
+	logger.SetReportCaller(ReportCaller)
 
 }
 
