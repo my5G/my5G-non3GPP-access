@@ -3,8 +3,7 @@ package udp_server
 import (
 	"sync"
 	"testing"
-
-	"free5gc/src/n3iwf/n3iwf_handler"
+	// "free5gc/src/n3iwf/n3iwf_handler"
 )
 
 func TestServer(t *testing.T) {
@@ -14,7 +13,7 @@ func TestServer(t *testing.T) {
 	wg.Add(2)
 
 	go Run()
-	go n3iwf_handler.Handle()
+	// go n3iwf_handler.Handle()
 
 	wg.Wait()
 
