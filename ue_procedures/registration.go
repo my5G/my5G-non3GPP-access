@@ -14,8 +14,7 @@ import (
 	"free5gc/src/n3iwf/context"
 	"free5gc/src/n3iwf/ike/handler"
 	"free5gc/src/n3iwf/ike/message"
-	"free5gc/src/ue/ue_ike/ike_message"
-
+	//"free5gc/src/ue/ue_ike/ike_message"
 	"github.com/sirupsen/logrus"
 	"hash"
 	"math/big"
@@ -222,7 +221,7 @@ func generateKeyForChildSA(ikeSecurityAssociation *context.IKESecurityAssociatio
 
 }
 
-func decryptProcedure(ikeSecurityAssociation *context.IKESecurityAssociation, message *ike_message.IKEMessage, encryptedPayload *message.Encrypted) ([]message.IKEPayloadType, error) {
+func decryptProcedure(ikeSecurityAssociation *context.IKESecurityAssociation, ikeMessage *message.IKEMessage, encryptedPayload *message.Encrypted) ([]message.IKEPayloadType, error) {
 	// Load needed information
 	transformIntegrityAlgorithm := ikeSecurityAssociation.IntegrityAlgorithm
 	transformEncryptionAlgorithm := ikeSecurityAssociation.EncryptionAlgorithm
@@ -231,7 +230,7 @@ func decryptProcedure(ikeSecurityAssociation *context.IKESecurityAssociation, me
 	// Checksum
 	checksum := encryptedPayload.EncryptedData[len(encryptedPayload.EncryptedData)-checksumLength:]
 
-	ikeMessageData, err := ike_message.Encode(message)
+	ikeMessageData, err := message.Encode(ikeMessage)
 	if err != nil {
 		return nil, errors.New("Encoding IKE message failed")
 	}
@@ -251,7 +250,7 @@ func decryptProcedure(ikeSecurityAssociation *context.IKESecurityAssociation, me
 		return nil, errors.New("Error decrypting message")
 	}
 
-	decryptedIKEPayload, err := ike_message.DecodePayload(encryptedPayload.NextPayload, plainText)
+	decryptedIKEPayload, err := message.DecodePayload(encryptedPayload.NextPayload, plainText)
 	if err != nil {
 		return nil, errors.New("Decoding decrypted payload failed")
 	}
@@ -512,37 +511,10 @@ func applyXFRMRule(ue_is_initiator bool, childSecurityAssociation *context.Child
 	return nil
 }
 
-func HandleRegistrationProcedure(ueContext *ue_context.UEContext){
-
-	// TODO: #LABORA what is the current step??
-	/*
-		if IDLE and DEREGISTERED
-			execute Initial Registration Procedure
-		elif IDLE and REGISTERED
-			execute Service Request
-		elif CONNECTED AND DEREGISTERED
-			execute Registration Procedure
-		else
-			execute Registration Procedure
-	*/
-	InitialRegistrationProcedure(ueContext)
-}
-
-func HandleDeregistrationProcedure(ueContext *ue_context.UEContext){
-
-}
-
-func SetupPDUSession(ueContext *ue_context.UEContext){
-
-}
-
-func DeregistrationProcedure(ueContext *ue_context.UEContext) {
-
-}
-
 func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	// New UE
-	ue := NewUeRanContext(fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI), 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2)
+	//ue := NewUeRanContext(fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI), 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2)
+	ue := NewUeRanContext("imsi-2089300007487", 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2)
 	ue.AmfUeNgapId = 1
 	ue.AuthenticationSubs = ueContext.GetAuthSubscription2()
 	mobileIdentity5GS := nasType.MobileIdentity5GS{
@@ -727,13 +699,13 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = ike_message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, ike_message.IKE_AUTH, ike_message.InitiatorBitCheck, 2)
+	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 2)
 
-	ikePayload = []ike_message.IKEPayloadType{}
+	ikePayload = []message.IKEPayloadType{}
 
 	// EAP-5G vendor type data
 	eapVendorTypeData := make([]byte, 2)
-	eapVendorTypeData[0] = ike_message.EAP5GType5GNAS
+	eapVendorTypeData[0] = message.EAP5GType5GNAS
 
 	// AN Parameters
 	anParameters := buildEAP5GANParameters()
@@ -743,20 +715,17 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	eapVendorTypeData = append(eapVendorTypeData, anParameters...)
 
 	// NAS
-	//ueSecurityCapability := setUESecurityCapability(ue)
-	//registrationRequest := nasTestpacket.GetRegistrationRequestWith5GMM(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil, ueSecurityCapability)
 	ueSecurityCapability := ue.GetUESecurityCapability()
 	registrationRequest := nasTestpacket.GetRegistrationRequest(nasMessage.RegistrationType5GSInitialRegistration,
 		mobileIdentity5GS, nil, ueSecurityCapability, nil, nil, nil)
-
 
 	nasLength := make([]byte, 2)
 	binary.BigEndian.PutUint16(nasLength, uint16(len(registrationRequest)))
 	eapVendorTypeData = append(eapVendorTypeData, nasLength...)
 	eapVendorTypeData = append(eapVendorTypeData, registrationRequest...)
 
-	eapExpanded := ike_message.BuildEAPExpanded(ike_message.VendorID3GPP, ike_message.VendorTypeEAP5G, eapVendorTypeData)
-	eap := ike_message.BuildEAP(ike_message.EAPCodeResponse, eapIdentifier, eapExpanded)
+	eapExpanded := message.BuildEAPExpanded(message.VendorID3GPP, message.VendorTypeEAP5G, eapVendorTypeData)
+	eap := message.BuildEAP(message.EAPCodeResponse, eapIdentifier, eapExpanded)
 
 	ikePayload = append(ikePayload, eap)
 
@@ -765,7 +734,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// Send to N3IWF
-	ikeMessageData, err = ike_message.Encode(ikeMessage)
+	ikeMessageData, err = message.Encode(ikeMessage)
 	if err != nil {
 		pingLog.Fatal(err)
 	}
@@ -778,11 +747,11 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	ikeMessage, err = ike_message.Decode(buffer[:n])
+	ikeMessage, err = message.Decode(buffer[:n])
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*ike_message.Encrypted)
+	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*message.Encrypted)
 	if !ok {
 		pingLog.Fatal("Received payload is not an encrypted payload")
 	}
@@ -791,16 +760,16 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		pingLog.Fatalf("Decrypt IKE message failed: %+v", err)
 	}
 
-	var eapReq *ike_message.EAP
+	var eapReq *message.EAP
 
-	eapReq, ok = decryptedIKEPayload[0].(*ike_message.EAP)
+	eapReq, ok = decryptedIKEPayload[0].(*message.EAP)
 	if !ok {
 		pingLog.Fatal("Received packet is not an EAP payload")
 	}
 
 	var decodedNAS *nas.Message
 
-	eapExpanded, ok = eapReq.EAPTypeData[0].(*ike_message.EAPExpanded)
+	eapExpanded, ok = eapReq.EAPTypeData[0].(*message.EAPExpanded)
 	if !ok {
 		pingLog.Fatal("The EAP data is not an EAP expended.")
 	}
@@ -821,13 +790,13 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	pdu := nasTestpacket.GetAuthenticationResponse(resStat, "")
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = ike_message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, ike_message.IKE_AUTH, ike_message.InitiatorBitCheck, 3)
+	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 3)
 
-	ikePayload = []ike_message.IKEPayloadType{}
+	ikePayload = []message.IKEPayloadType{}
 
 	// EAP-5G vendor type data
 	eapVendorTypeData = make([]byte, 4)
-	eapVendorTypeData[0] = ike_message.EAP5GType5GNAS
+	eapVendorTypeData[0] = message.EAP5GType5GNAS
 
 	// NAS - Authentication Response
 	nasLength = make([]byte, 2)
@@ -835,8 +804,8 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	eapVendorTypeData = append(eapVendorTypeData, nasLength...)
 	eapVendorTypeData = append(eapVendorTypeData, pdu...)
 
-	eapExpanded = ike_message.BuildEAPExpanded(ike_message.VendorID3GPP, ike_message.VendorTypeEAP5G, eapVendorTypeData)
-	eap = ike_message.BuildEAP(ike_message.EAPCodeResponse, eapReq.Identifier, eapExpanded)
+	eapExpanded = message.BuildEAPExpanded(message.VendorID3GPP, message.VendorTypeEAP5G, eapVendorTypeData)
+	eap = message.BuildEAP(message.EAPCodeResponse, eapReq.Identifier, eapExpanded)
 
 	ikePayload = append(ikePayload, eap)
 
@@ -846,7 +815,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// Send to N3IWF
-	ikeMessageData, err = ike_message.Encode(ikeMessage)
+	ikeMessageData, err = message.Encode(ikeMessage)
 	if err != nil {
 		pingLog.Fatal(err)
 	}
@@ -860,11 +829,11 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	ikeMessage, err = ike_message.Decode(buffer[:n])
+	ikeMessage, err = message.Decode(buffer[:n])
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*ike_message.Encrypted)
+	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*message.Encrypted)
 	if !ok {
 		pingLog.Fatal("Received pakcet is not and encrypted payload")
 	}
@@ -872,11 +841,11 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	eapReq, ok = decryptedIKEPayload[0].(*ike_message.EAP)
+	eapReq, ok = decryptedIKEPayload[0].(*message.EAP)
 	if !ok {
 		pingLog.Fatal("Received packet is not an EAP payload")
 	}
-	eapExpanded, ok = eapReq.EAPTypeData[0].(*ike_message.EAPExpanded)
+	eapExpanded, ok = eapReq.EAPTypeData[0].(*message.EAPExpanded)
 	if !ok {
 		pingLog.Fatal("Received packet is not an EAP expended payload")
 	}
@@ -891,13 +860,13 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	//assert.Nil(t, err)
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = ike_message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, ike_message.IKE_AUTH, ike_message.InitiatorBitCheck, 4)
+	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 4)
 
-	ikePayload = []ike_message.IKEPayloadType{}
+	ikePayload = []message.IKEPayloadType{}
 
 	// EAP-5G vendor type data
 	eapVendorTypeData = make([]byte, 4)
-	eapVendorTypeData[0] = ike_message.EAP5GType5GNAS
+	eapVendorTypeData[0] = message.EAP5GType5GNAS
 
 	// NAS - Authentication Response
 	nasLength = make([]byte, 2)
@@ -905,8 +874,8 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	eapVendorTypeData = append(eapVendorTypeData, nasLength...)
 	eapVendorTypeData = append(eapVendorTypeData, pdu...)
 
-	eapExpanded = ike_message.BuildEAPExpanded(ike_message.VendorID3GPP, ike_message.VendorTypeEAP5G, eapVendorTypeData)
-	eap = ike_message.BuildEAP(ike_message.EAPCodeResponse, eapReq.Identifier, eapExpanded)
+	eapExpanded = message.BuildEAPExpanded(message.VendorID3GPP, message.VendorTypeEAP5G, eapVendorTypeData)
+	eap = message.BuildEAP(message.EAPCodeResponse, eapReq.Identifier, eapExpanded)
 
 	ikePayload = append(ikePayload, eap)
 
@@ -916,7 +885,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// Send to N3IWF
-	ikeMessageData, err = ike_message.Encode(ikeMessage)
+	ikeMessageData, err = message.Encode(ikeMessage)
 	if err != nil {
 		pingLog.Fatal(err)
 	}
@@ -930,11 +899,11 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	ikeMessage, err = ike_message.Decode(buffer[:n])
+	ikeMessage, err = message.Decode(buffer[:n])
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*ike_message.Encrypted)
+	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*message.Encrypted)
 	if !ok {
 		pingLog.Fatal("Received pakcet is not and encrypted payload")
 	}
@@ -942,26 +911,26 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	eapReq, ok = decryptedIKEPayload[0].(*ike_message.EAP)
+	eapReq, ok = decryptedIKEPayload[0].(*message.EAP)
 	if !ok {
 		pingLog.Fatal("Received packet is not an EAP payload")
 	}
-	if eapReq.Code != ike_message.EAPCodeSuccess {
+	if eapReq.Code != message.EAPCodeSuccess {
 		pingLog.Fatal("Not Success")
 	}
 
 	// IKE_AUTH - Authentication
-	ikeMessage = ike_message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, ike_message.IKE_AUTH, ike_message.InitiatorBitCheck, 5)
+	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 5)
 
-	ikePayload = []ike_message.IKEPayloadType{}
+	ikePayload = []message.IKEPayloadType{}
 
 	// Authentication
-	auth := ike_message.BuildAuthentication(ike_message.SharedKeyMesageIntegrityCode, []byte{1, 2, 3})
+	auth := message.BuildAuthentication(message.SharedKeyMesageIntegrityCode, []byte{1, 2, 3})
 	ikePayload = append(ikePayload, auth)
 
 	// Configuration Request
-	configurationAttribute := ike_message.BuildConfigurationAttribute(ike_message.INTERNAL_IP4_ADDRESS, nil)
-	configurationRequest := ike_message.BuildConfiguration(ike_message.CFG_REQUEST, []*ike_message.IndividualConfigurationAttribute{configurationAttribute})
+	configurationAttribute := message.BuildConfigurationAttribute(message.INTERNAL_IP4_ADDRESS, nil)
+	configurationRequest := message.BuildConfiguration(message.CFG_REQUEST, []*message.IndividualConfigurationAttribute{configurationAttribute})
 	ikePayload = append(ikePayload, configurationRequest)
 
 	err = encryptProcedure(ikeSecurityAssociation, ikePayload, ikeMessage)
@@ -970,7 +939,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// Send to N3IWF
-	ikeMessageData, err = ike_message.Encode(ikeMessage)
+	ikeMessageData, err = message.Encode(ikeMessage)
 	if err != nil {
 		pingLog.Fatal(err)
 	}
@@ -984,11 +953,11 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	ikeMessage, err = ike_message.Decode(buffer[:n])
+	ikeMessage, err = message.Decode(buffer[:n])
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*ike_message.Encrypted)
+	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*message.Encrypted)
 	if !ok {
 		pingLog.Fatal("Received pakcet is not and encrypted payload")
 	}
@@ -998,40 +967,40 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// AUTH, SAr2, TSi, Tsr, N(NAS_IP_ADDRESS), N(NAS_TCP_PORT)
-	var responseSecurityAssociation *ike_message.SecurityAssociation
-	var responseTrafficSelectorInitiator *ike_message.TrafficSelectorInitiator
-	var responseTrafficSelectorResponder *ike_message.TrafficSelectorResponder
-	var responseConfiguration *ike_message.Configuration
+	var responseSecurityAssociation *message.SecurityAssociation
+	var responseTrafficSelectorInitiator *message.TrafficSelectorInitiator
+	var responseTrafficSelectorResponder *message.TrafficSelectorResponder
+	var responseConfiguration *message.Configuration
 	n3iwfNASAddr := new(net.TCPAddr)
 	ueAddr := new(net.IPNet)
 
 	for _, ikePayload := range decryptedIKEPayload {
 		switch ikePayload.Type() {
-		case ike_message.TypeAUTH:
+		case message.TypeAUTH:
 			pingLog.Infoln("Get Authentication from N3IWF")
-		case ike_message.TypeSA:
-			responseSecurityAssociation = ikePayload.(*ike_message.SecurityAssociation)
+		case message.TypeSA:
+			responseSecurityAssociation = ikePayload.(*message.SecurityAssociation)
 			ikeSecurityAssociation.IKEAuthResponseSA = responseSecurityAssociation
-		case ike_message.TypeTSi:
-			responseTrafficSelectorInitiator = ikePayload.(*ike_message.TrafficSelectorInitiator)
-		case ike_message.TypeTSr:
-			responseTrafficSelectorResponder = ikePayload.(*ike_message.TrafficSelectorResponder)
-		case ike_message.TypeN:
-			notification := ikePayload.(*ike_message.Notification)
-			if notification.NotifyMessageType == ike_message.Vendor3GPPNotifyTypeNAS_IP4_ADDRESS {
+		case message.TypeTSi:
+			responseTrafficSelectorInitiator = ikePayload.(*message.TrafficSelectorInitiator)
+		case message.TypeTSr:
+			responseTrafficSelectorResponder = ikePayload.(*message.TrafficSelectorResponder)
+		case message.TypeN:
+			notification := ikePayload.(*message.Notification)
+			if notification.NotifyMessageType == message.Vendor3GPPNotifyTypeNAS_IP4_ADDRESS {
 				n3iwfNASAddr.IP = net.IPv4(notification.NotificationData[0], notification.NotificationData[1], notification.NotificationData[2], notification.NotificationData[3])
 			}
-			if notification.NotifyMessageType == ike_message.Vendor3GPPNotifyTypeNAS_TCP_PORT {
+			if notification.NotifyMessageType == message.Vendor3GPPNotifyTypeNAS_TCP_PORT {
 				n3iwfNASAddr.Port = int(binary.BigEndian.Uint16(notification.NotificationData))
 			}
-		case ike_message.TypeCP:
-			responseConfiguration = ikePayload.(*ike_message.Configuration)
-			if responseConfiguration.ConfigurationType == ike_message.CFG_REPLY {
+		case message.TypeCP:
+			responseConfiguration = ikePayload.(*message.Configuration)
+			if responseConfiguration.ConfigurationType == message.CFG_REPLY {
 				for _, configAttr := range responseConfiguration.ConfigurationAttribute {
-					if configAttr.Type == ike_message.INTERNAL_IP4_ADDRESS {
+					if configAttr.Type == message.INTERNAL_IP4_ADDRESS {
 						ueAddr.IP = configAttr.Value
 					}
-					if configAttr.Type == ike_message.INTERNAL_IP4_NETMASK {
+					if configAttr.Type == message.INTERNAL_IP4_NETMASK {
 						ueAddr.Mask = configAttr.Value
 					}
 				}
@@ -1144,13 +1113,13 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
-	ikeMessage, err = ike_message.Decode(buffer[:n])
+	ikeMessage, err = message.Decode(buffer[:n])
 	if err != nil {
 		pingLog.Fatal(err)
 	}
 	pingLog.Infof("IKE message exchange type: %d", ikeMessage.ExchangeType)
 	pingLog.Infof("IKE message ID: %d", ikeMessage.MessageID)
-	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*ike_message.Encrypted)
+	encryptedPayload, ok = ikeMessage.IKEPayload[0].(*message.Encrypted)
 	if !ok {
 		pingLog.Fatal("Received pakcet is not and encrypted payload")
 	}
@@ -1162,29 +1131,29 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	var upIPAddr net.IP
 	for _, ikePayload := range decryptedIKEPayload {
 		switch ikePayload.Type() {
-		case ike_message.TypeSA:
-			responseSecurityAssociation = ikePayload.(*ike_message.SecurityAssociation)
-		case ike_message.TypeTSi:
-			responseTrafficSelectorInitiator = ikePayload.(*ike_message.TrafficSelectorInitiator)
-		case ike_message.TypeTSr:
-			responseTrafficSelectorResponder = ikePayload.(*ike_message.TrafficSelectorResponder)
-		case ike_message.TypeN:
-			notification := ikePayload.(*ike_message.Notification)
-			if notification.NotifyMessageType == ike_message.Vendor3GPPNotifyType5G_QOS_INFO {
+		case message.TypeSA:
+			responseSecurityAssociation = ikePayload.(*message.SecurityAssociation)
+		case message.TypeTSi:
+			responseTrafficSelectorInitiator = ikePayload.(*message.TrafficSelectorInitiator)
+		case message.TypeTSr:
+			responseTrafficSelectorResponder = ikePayload.(*message.TrafficSelectorResponder)
+		case message.TypeN:
+			notification := ikePayload.(*message.Notification)
+			if notification.NotifyMessageType == message.Vendor3GPPNotifyType5G_QOS_INFO {
 				pingLog.Infoln("Received Qos Flow settings")
 			}
-			if notification.NotifyMessageType == ike_message.Vendor3GPPNotifyTypeUP_IP4_ADDRESS {
+			if notification.NotifyMessageType == message.Vendor3GPPNotifyTypeUP_IP4_ADDRESS {
 				pingLog.Infof("UP IP Address: %+v\n", notification.NotificationData)
 				upIPAddr = notification.NotificationData[:4]
 			}
-		case ike_message.TypeNiNr:
-			responseNonce := ikePayload.(*ike_message.Nonce)
+		case message.TypeNiNr:
+			responseNonce := ikePayload.(*message.Nonce)
 			ikeSecurityAssociation.ConcatenatedNonce = responseNonce.NonceData
 		}
 	}
 
 	// IKE CREATE_CHILD_SA response
-	ikeMessage = ike_message.BuildIKEHeader(ikeMessage.InitiatorSPI, ikeMessage.ResponderSPI, ike_message.CREATE_CHILD_SA, ike_message.ResponseBitCheck, ikeMessage.MessageID)
+	ikeMessage = message.BuildIKEHeader(ikeMessage.InitiatorSPI, ikeMessage.ResponderSPI, message.CREATE_CHILD_SA, message.ResponseBitCheck, ikeMessage.MessageID)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -1373,4 +1342,32 @@ func setUESecurityCapability(ue *UeRanContext) (UESecurityCapability *nasType.UE
 	}
 
 	return
+}
+
+func HandleRegistrationProcedure(ueContext *ue_context.UEContext){
+
+	// TODO: #LABORA what is the current step??
+	/*
+		if IDLE and DEREGISTERED
+			execute Initial Registration Procedure
+		elif IDLE and REGISTERED
+			execute Service Request
+		elif CONNECTED AND DEREGISTERED
+			execute Registration Procedure
+		else
+			execute Registration Procedure
+	*/
+	InitialRegistrationProcedure(ueContext)
+}
+
+func HandleDeregistrationProcedure(ueContext *ue_context.UEContext){
+
+}
+
+func SetupPDUSession(ueContext *ue_context.UEContext){
+
+}
+
+func DeregistrationProcedure(ueContext *ue_context.UEContext) {
+
 }

@@ -1,10 +1,10 @@
 package ue_procedures
 
 import (
-"fmt"
-"free5gc/lib/nas"
-"free5gc/lib/nas/security"
-"reflect"
+	"fmt"
+	"free5gc/lib/nas"
+	"free5gc/lib/nas/security"
+	"reflect"
 )
 
 func NASEncode(ue *UeRanContext, msg *nas.Message, securityContextAvailable bool, newSecurityContext bool) (
