@@ -149,3 +149,23 @@ func (context *UEContext) GetAuthSubscription() (authSubs models.AuthenticationS
 	authSubs.AuthenticationMethod = context.AuthenticationMethod
 	return
 }
+
+// temporário
+func (context *UEContext) GetAuthSubscription2() (authSubs models.AuthenticationSubscription) {
+	authSubs.PermanentKey = &models.PermanentKey{
+		PermanentKeyValue: TestGenAuthData.MilenageTestSet19.K,
+	}
+	authSubs.Opc = &models.Opc{
+		OpcValue: TestGenAuthData.MilenageTestSet19.OPC,
+	}
+	authSubs.Milenage = &models.Milenage{
+		Op: &models.Op{
+			OpValue: TestGenAuthData.MilenageTestSet19.OP,
+		},
+	}
+	authSubs.AuthenticationManagementField = "8000"
+
+	authSubs.SequenceNumber = TestGenAuthData.MilenageTestSet19.SQN
+	authSubs.AuthenticationMethod = models.AuthMethod__5_G_AKA
+	return
+}
