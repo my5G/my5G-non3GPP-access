@@ -368,6 +368,7 @@ func buildEAP5GANParameters() []byte {
 func parseIPAddressInformationToChildSecurityAssociation(
 	childSecurityAssociation *context.ChildSecurityAssociation,
 	n3iwfPublicIPAddr net.IP,
+	ikeBindAddr string,
 	trafficSelectorLocal *message.IndividualTrafficSelector,
 	trafficSelectorRemote *message.IndividualTrafficSelector) error {
 
@@ -376,7 +377,7 @@ func parseIPAddressInformationToChildSecurityAssociation(
 	}
 
 	childSecurityAssociation.PeerPublicIPAddr = n3iwfPublicIPAddr
-	childSecurityAssociation.LocalPublicIPAddr = net.ParseIP("192.168.127.2")
+	childSecurityAssociation.LocalPublicIPAddr = net.ParseIP(ikeBindAddr)
 
 	childSecurityAssociation.TrafficSelectorLocal = net.IPNet{
 		IP:   trafficSelectorLocal.StartAddress,
@@ -1013,7 +1014,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		pingLog.Fatalf("Create child security association context failed: %+v", err)
 		return
 	}
-	err = parseIPAddressInformationToChildSecurityAssociation(childSecurityAssociationContext, net.ParseIP("192.168.127.1"), responseTrafficSelectorInitiator.TrafficSelectors[0], responseTrafficSelectorResponder.TrafficSelectors[0])
+	err = parseIPAddressInformationToChildSecurityAssociation(childSecurityAssociationContext, net.ParseIP(ueContext.N3IWFIpAddress), ueContext.IKEBindAddress, responseTrafficSelectorInitiator.TrafficSelectors[0], responseTrafficSelectorResponder.TrafficSelectors[0])
 	if err != nil {
 		pingLog.Fatalf("Parse IP address to child security association failed: %+v", err)
 		return
@@ -1191,7 +1192,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		pingLog.Fatalf("Create child security association context failed: %+v", err)
 		return
 	}
-	err = parseIPAddressInformationToChildSecurityAssociation(childSecurityAssociationContextUserPlane, net.ParseIP("192.168.127.1"), responseTrafficSelectorResponder.TrafficSelectors[0], responseTrafficSelectorInitiator.TrafficSelectors[0])
+	err = parseIPAddressInformationToChildSecurityAssociation(childSecurityAssociationContextUserPlane, net.ParseIP(ueContext.N3IWFIpAddress), ueContext.IKEBindAddress, responseTrafficSelectorResponder.TrafficSelectors[0], responseTrafficSelectorInitiator.TrafficSelectors[0])
 	if err != nil {
 		pingLog.Fatalf("Parse IP address to child security association failed: %+v", err)
 		return
