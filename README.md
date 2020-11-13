@@ -29,11 +29,11 @@ go build -o bin/ue -x src/ue/ue.go
 ip link add ipsec0 type vti local LOCAL_UE_IP remote N3IWF_IP key 5
 ip link set ipsec0 up
 
+# execute UE in background
 ./ue &
 
-cd ~/my5G-core/src/ue/
-
-./trigger_initial_request.sh
+# trigger initial registration procedure
+./src/ue/trigger_initial_request.sh
     
 Options:
   --ue_addr         address in which the UE is listening to trigger procedures
