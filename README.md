@@ -24,7 +24,8 @@ go build -o bin/ue -x src/ue/ue.go
 **Usage**
 ---
 
-```
+```bash
+# create the ipsec link required
 ip link add ipsec0 type vti local LOCAL_UE_IP remote N3IWF_IP key 5
 ip link set ipsec0 up
 
