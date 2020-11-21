@@ -19,7 +19,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-sudo ip netns exec UEns curl --insecure --location --request POST "$scheme://$ue_addr:$ue_port/registration/" \
+curl --insecure --location --request POST "$scheme://$ue_addr:$ue_port/registration/" \
 --header 'Content-Type: application/json' \
 --data-raw "{
     \"authenticationMethod\": \"$auth_method\",

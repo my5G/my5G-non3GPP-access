@@ -27,6 +27,8 @@ type UE struct{}
 type (
 	Config struct {
 		uecfg string
+		ue_http_addr string
+		ue_http_port string
 	}
 )
 
@@ -41,6 +43,15 @@ var ueCLi = []cli.Flag{
 		Name:  "uecfg",
 		Usage: "ue config file",
 	},
+	cli.StringFlag{
+		Name: "ue_http_addr",
+		Usage: "ue http binding address",
+	},
+	cli.StringFlag{
+		Name: "ue_http_port",
+		Usage: "ue http binding port",
+	},
+
 }
 
 var initLog *logrus.Entry
@@ -57,6 +68,8 @@ func (*UE) Initialize(c *cli.Context) {
 
 	config = Config{
 		uecfg: c.String("uecfg"),
+		ue_http_addr: c.String("ue_http_addr"),
+		ue_http_port: c.String("ue_http_port"),
 	}
 
 	fmt.Println(c.Args())
@@ -65,6 +78,14 @@ func (*UE) Initialize(c *cli.Context) {
 		factory.InitConfigFactory(path_util.Gofree5gcPath(config.uecfg))
 	} else {
 		factory.InitConfigFactory(ue_util.DefaultUeConfigPath)
+	}
+
+	// override uecfg.conf file is command line arg is informed
+	if config.ue_http_addr != "" {
+		factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Address = config.ue_http_addr
+	}
+	if config.ue_http_port != "" {
+		factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Port = config.ue_http_port
 	}
 
 	// TODO: get these two variables from ue-iot-non3gpp config file
@@ -134,7 +155,8 @@ func (ue *UE) Start() {
 	initLog.Infoln(addr)
 	server, err := http2_util.NewServer(addr, ue_util.UeLogPath, router)
 	if err == nil && server != nil {
-		initLog.Infoln(server.ListenAndServeTLS(ue_util.UePemPath, ue_util.UeKeyPath))
+		//initLog.Infoln(server.ListenAndServeTLS(ue_util.UePemPath, ue_util.UeKeyPath))
+		initLog.Infoln(server.ListenAndServe())
 	} else {
 		initLog.Errorf("Initialize http2 server failed: %+v", err)
 	}
