@@ -26,4 +26,4 @@ If you have questions or comments, please email us: [my5G team](mailto:my5G.init
 
 ## License
 
-Apache 2.0
+[Apache 2.0](https://github.com/my5G/my5G-non3GPP-access/blob/master/LICENSE
