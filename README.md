@@ -18,7 +18,7 @@ If you have questions or comments, please email us: [my5G team](mailto:my5G.init
 
 ## Documentation
 
-For documentation, please reference to [Wiki](https://github.com/my5G/my5G-non3GPP-access/wiki).
+For documentation, please reference to [wiki](https://github.com/my5G/my5G-non3GPP-access/wiki).
 
 ## Contributing
 
