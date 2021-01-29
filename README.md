@@ -18,12 +18,12 @@ If you have questions or comments, please email us: [my5G team](mailto:my5G.init
 
 ## Documentation
 
-[https://github.com/my5G/my5G-non3GPP-access/wiki](https://github.com/my5G/my5G-non3GPP-access/wiki)
+For documentation, please reference to [Wiki](https://github.com/my5G/my5G-non3GPP-access/wiki).
 
 ## Contributing
 
-[https://github.com/my5G/template/blob/main/CONTRIBUTING.md](https://github.com/my5G/template/blob/main/CONTRIBUTING.md)
+For contribution, please reference to [guidelines](https://github.com/my5G/template/blob/main/CONTRIBUTING.md)
 
 ## License
 
-[Apache 2.0](https://github.com/my5G/my5G-non3GPP-access/blob/master/LICENSE)
+non3GPP-access is now under [Apache 2.0](https://github.com/my5G/my5G-non3GPP-access/blob/master/LICENSE) license.
