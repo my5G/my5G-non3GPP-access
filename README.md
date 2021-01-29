@@ -22,7 +22,7 @@ For documentation, please reference to [Wiki](https://github.com/my5G/my5G-non3G
 
 ## Contributing
 
-For contribution, please reference to [guidelines](https://github.com/my5G/template/blob/main/CONTRIBUTING.md)
+For contribution, please reference to [guidelines](https://github.com/my5G/template/blob/main/CONTRIBUTING.md).
 
 ## License
 
