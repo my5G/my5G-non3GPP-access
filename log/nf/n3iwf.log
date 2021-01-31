@@ -1,0 +1,2 @@
+time="2020-11-26T04:34:32-03:00" level=warning msg="[IKE] Invalid IKE bind IP address, binding 0.0.0.0" category=IKE component=N3IWF
+time="2020-11-26T04:34:32-03:00" level=error msg="[IKE] Listen on UDP socket failed: listen udp 0.0.0.0:500: bind: permission denied" category=IKE component=N3IWF

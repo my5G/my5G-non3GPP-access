@@ -1,29 +1,55 @@
-<img width="20%" src="docs/media/img/my5g-logo.png" alt="my5G-core"/>
+# UE-IoT-non3GPP
 
-# non3GPP-access
-
-![GitHub](https://img.shields.io/github/license/my5G/my5G-non3GPP-access?color=blue)
-![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/my5G/my5GCore)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/y/my5G/my5G-non3GPP-access) 
-![GitHub last commit](https://img.shields.io/github/last-commit/my5G/my5G-non3GPP-access)
-![GitHub contributors](https://img.shields.io/github/contributors/my5G/my5G-non3GPP-access)
-
-----
-## Description
-
-non3GPP-access is an open-source implementation to provide untrusted non3GPP access to 5GCN according to 3GPP Release 15.
+UE-IoT-non3GPP is an open-source implementation to provide untrusted non3GPP access to 5GCN according to 3GPP Release 15.
 All the access is done via N3IWF.
 
-If you have questions or comments, please email us: [my5G team](mailto:my5G.initiative@gmail.com). 
 
-## Documentation
+**Requirements**
+---
 
-For documentation, please reference to [wiki](https://github.com/my5G/my5G-non3GPP-access/wiki).
+* Go 1.4.4
 
-## Contributing
+**Compilation**
+---
 
-For contribution, please reference to [guidelines](https://github.com/my5G/template/blob/main/CONTRIBUTING.md).
+```
+cd ~
+git clone --recursive https://github.com/my5G/my5G-core
+git clone https://github.com/my5G/UE-IoT-non3GPP my5G-core/src/ue
+cd my5G-core
+go build -o bin/ue -x src/ue/ue.go
 
-## License
+```
 
-non3GPP-access is now under [Apache 2.0](https://github.com/my5G/my5G-non3GPP-access/blob/master/LICENSE) license.
+**Usage**
+---
+
+```bash
+# create the ipsec link required
+ip link add ipsec0 type vti local LOCAL_UE_IP remote N3IWF_IP key 5
+ip link set ipsec0 up
+
+# execute UE in background
+./ue &
+
+# trigger initial registration procedure
+./src/ue/trigger_initial_request.sh
+    
+Options:
+  --ue_addr         address in which the UE is listening to trigger procedures
+  --ue_port         port in which the UE is listening to trigger procedures
+  --scheme          [https|http]
+  --n3iwf_address   address of the n3iwf
+  --supi_or_suci    unique subscriber identifier
+  --k               key
+  --opc             operator code
+  --ike_bind_addr   address to bind UE IKE to
+```
+
+**How to Contribute**
+---
+
+1. Fork this repo
+1. Clone your fork and create a new branch: `$ git checkout https://github.com/your_username_here/UE-IoT-non3GPP -b name_for_new_branch`.
+2. Make changes and test
+3. Submit Pull Request with comprehensive description of changes
