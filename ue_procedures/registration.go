@@ -1303,14 +1303,14 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 
 	time.Sleep(1 * time.Second)
 
-	stats := pinger.Statistics()
-	if stats.PacketsSent != stats.PacketsRecv {
-		pingLog.Fatal("Ping Failed")
-	}else{
-		pingLog.Infoln("Ping Succeed")
-	}
+	//stats := pinger.Statistics()
+	//if stats.PacketsSent != stats.PacketsRecv {
+	//	pingLog.Fatal("Ping Failed")
+	//}else{
+	//	pingLog.Infoln("Ping Succeed")
+	//}
 
-	pingLog.Infoln("Keep proccess active for 5 hours...")
+	//pingLog.Infoln("Keep proccess active for 5 hours...")
 	time.Sleep(5 * time.Hour)
 }
 
