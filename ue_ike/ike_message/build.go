@@ -1,7 +1,11 @@
 package ike_message
 
 import (
+	"crypto/rand"
 	"encoding/binary"
+	"log"
+	"math"
+	"math/big"
 	"net"
 )
 
@@ -282,4 +286,19 @@ func BuildNotifyNAS_TCP_PORT(port uint16) *Notification {
 		binary.BigEndian.PutUint16(portData, port)
 		return BuildNotification(TypeNone, Vendor3GPPNotifyTypeNAS_TCP_PORT, nil, portData)
 	}
+}
+
+func BuildNewIKESpi() uint64 {
+
+	var maxSPI *big.Int = new(big.Int).SetUint64(math.MaxUint64)
+	var localSPIuint64 uint64
+
+	localSPI, err := rand.Int(rand.Reader, maxSPI)
+	if err != nil {
+		log.Print("[Context] Error occurs when generate new IKE SPI")
+		return 123123
+	}
+	localSPIuint64 = localSPI.Uint64()
+
+	return localSPIuint64
 }

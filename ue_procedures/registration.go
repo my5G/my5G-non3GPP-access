@@ -14,6 +14,8 @@ import (
 	"free5gc/src/n3iwf/context"
 	"free5gc/src/n3iwf/ike/handler"
 	"free5gc/src/n3iwf/ike/message"
+	"free5gc/src/ue/ue_ike/ike_message"
+
 	//"free5gc/src/ue/ue_ike/ike_message"
 	"github.com/sirupsen/logrus"
 	"hash"
@@ -523,6 +525,8 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
 	}
 
+	newSPI := ike_message.BuildNewIKESpi()
+	
 	n3iwfUDPAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:500", ueContext.N3IWFIpAddress))
 	if err != nil {
 		pingLog.Fatal(err)
@@ -530,7 +534,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	udpConnection := setupUDPSocket(ueContext, pingLog)
 
 	// IKE_SA_INIT
-	ikeMessage := message.BuildIKEHeader(123123, 0, message.IKE_SA_INIT, message.InitiatorBitCheck, 0)
+	ikeMessage := message.BuildIKEHeader(newSPI, 0, message.IKE_SA_INIT, message.InitiatorBitCheck, 0)
 
 	// Security Association
 	proposal := message.BuildProposal(1, message.TypeIKE, nil)
@@ -609,7 +613,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	ikeSecurityAssociation := &context.IKESecurityAssociation{
-		LocalSPI:               123123,
+		LocalSPI:               newSPI,
 		RemoteSPI:              ikeMessage.ResponderSPI,
 		EncryptionAlgorithm:    encryptTransform,
 		IntegrityAlgorithm:     integrityTransform,
@@ -624,7 +628,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 1)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 1)
 
 	var ikePayload []message.IKEPayloadType
 
@@ -700,7 +704,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 2)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 2)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -791,7 +795,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	pdu := nasTestpacket.GetAuthenticationResponse(resStat, "")
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 3)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 3)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -861,7 +865,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	//assert.Nil(t, err)
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 4)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 4)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -921,7 +925,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH - Authentication
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 5)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 5)
 
 	ikePayload = []message.IKEPayloadType{}
 
