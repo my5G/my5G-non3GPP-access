@@ -17,6 +17,7 @@ var RegistrationLog *logrus.Entry
 var DeregistrationLog *logrus.Entry
 var HandlerLog *logrus.Entry
 var IKELog *logrus.Entry
+var GRELog *logrus.Entry
 
 func init() {
 	log = logrus.New()
@@ -51,6 +52,7 @@ func init() {
 	DeregistrationLog = log.WithFields(logrus.Fields{"UE": "Deregistration"})
 	HandlerLog = log.WithFields(logrus.Fields{"UE": "Handler"})
 	IKELog = log.WithFields(logrus.Fields{"UE": "IKE"})
+	GRELog = log.WithFields(logrus.Fields{"UE": "GRE"})
 }
 
 func SetLogLevel(level logrus.Level) {

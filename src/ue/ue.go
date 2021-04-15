@@ -5,12 +5,12 @@ import(
 	"github.com/urfave/cli"
 	"free5gc/src/app"
 	"free5gc/src/ue/logger"
-	"free5gc/src/ue/ue_service"
+	"free5gc/src/ue/service"
 	"free5gc/src/ue/version"
 	"os"
 )
 
-var UE =  &ue_service.UE{}
+var UE =  &service.UE{}
 var appLog *logrus.Entry
 
 func init() {

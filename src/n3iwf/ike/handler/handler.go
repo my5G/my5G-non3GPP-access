@@ -689,9 +689,9 @@ func HandleIKEAUTH(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr, message
 
 			switch eapTypeData.Type() {
 			// TODO: handle
-			// case ike_message.EAPTypeIdentity:
-			// case ike_message.EAPTypeNotification:
-			// case ike_message.EAPTypeNak:
+			// case message.EAPTypeIdentity:
+			// case message.EAPTypeNotification:
+			// case message.EAPTypeNak:
 			case ike_message.EAPTypeExpanded:
 				eapExpanded = eapTypeData.(*ike_message.EAPExpanded)
 			default:
@@ -838,18 +838,18 @@ func HandleIKEAUTH(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr, message
 					ikeLog.Warn("[IKE] Peer authentication failed.")
 					// Inform UE the authentication has failed
 					// IKEHDR-SK-{response}
-					var notification *ike_message.Notification
+					var notification *message.Notification
 
 					// Build IKE message
-					responseIKEMessage = ike_message.BuildIKEHeader(message.InitiatorSPI, message.ResponderSPI,
-						 ike_message.IKE_AUTH, ike_message.ResponseBitCheck, message.MessageID)
+					responseIKEMessage = message.BuildIKEHeader(message.InitiatorSPI, message.ResponderSPI,
+						 message.IKE_AUTH, message.ResponseBitCheck, message.MessageID)
 
 					// Build response
-					var ikePayload []ike_message.IKEPayloadType
+					var ikePayload []message.IKEPayloadType
 
 					// Notification
 					notification =
-						ike_message.BuildNotification(ike_message.TypeNone, ike_message.AUTHENTICATION_FAILED, nil, nil)
+						message.BuildNotification(message.TypeNone, message.AUTHENTICATION_FAILED, nil, nil)
 					ikePayload = append(ikePayload, notification)
 
 					if err := EncryptProcedure(ikeSecurityAssociation, ikePayload, responseIKEMessage); err != nil {
@@ -866,7 +866,7 @@ func HandleIKEAUTH(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr, message
 			ikeLog.Warn("[IKE] Peer authentication failed.")
 			// Inform UE the authentication has failed
 			// IKEHDR-SK-{response}
-			// var responseNotification *ike_message.Notification
+			// var responseNotification *message.Notification
 
 			// Build IKE message
 			responseIKEMessage = ike_message.BuildIKEHeader(message.InitiatorSPI, message.ResponderSPI,
