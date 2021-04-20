@@ -48,6 +48,22 @@ var (
 	//EAP sinaling
 	eapIdentifier uint8
 	messageID uint32
+	sharedKeyExchangeData []byte
+	remoteNonce []byte
+	attributeType uint16 = ike.AttributeTypeKeyLength
+	keyLength uint16 = 256
+
+
+ 	ikePayload ike.IKEPayloadContainer
+	eapReq *ike.EAP
+	eapExpanded *ike.EAPExpanded
+	decodedNAS *nas.Message
+
+
+    responseSecurityAssociation *ike.SecurityAssociation
+	responseTrafficSelectorInitiator *ike.TrafficSelectorInitiator
+	responseTrafficSelectorResponder *ike.TrafficSelectorResponder
+	responseConfiguration *ike.Configuration
 )
 
 func init() {
@@ -60,14 +76,6 @@ func HandleIKESAINIT(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr , mess
 	
 	// context init variables
 	ueSelf := context.UE_Self()
-
-	/* 
-		Used to request and reponse value to peer
-	*/
-	var sharedKeyExchangeData []byte
-	var remoteNonce []byte
-	var attributeType uint16 = ike.AttributeTypeKeyLength
-	var keyLength uint16 = 256
 
 	if  message != nil && message.Flags == ike.ResponseBitCheck {
 
@@ -183,11 +191,6 @@ func HandleIKEAUTH(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr, ikeMess
 	/*
 		Used to request and reponse value to peer
 	*/
-	var ikePayload ike.IKEPayloadContainer
-	var eapIdentifier uint8
-	var eapReq *ike.EAP
-	var eapExpanded *ike.EAPExpanded
-	var decodedNAS *nas.Message
 
 	if ikeMessage == nil {
 		ikeLog.Error("IKE Message is nil")
@@ -270,7 +273,7 @@ func HandleIKEAUTH(udpConn *net.UDPConn, n3iwfAddr, ueAddr *net.UDPAddr, ikeMess
 				ikeLog.Infoln("Get EAP")
 			}
 		}
-		//------------------request 5
+	 	//------------------request 5
 		// IKE_AUTH - EAP exchange
 		ikeMessage.Payloads.Reset()
 		ikeMessage.BuildIKEHeader(localSPI, ikeSecurityAssociation.RemoteSPI, ike.IKE_AUTH,
@@ -481,12 +484,6 @@ func HandleCREATECHILDSA(udpConn *net.UDPConn, n3iwfAddr, ueUDPAddr *net.UDPAddr
 	//Local Virtual UE
 	thisUE := ikeSecurityAssociation.ThisUE
 
-	//Ike msg, AUTH, SAr2, TSi, Tsr, N(NAS_IP_ADDRESS), N(NAS_TCP_PORT)
-	var ikePayload ike.IKEPayloadContainer
-	var responseSecurityAssociation *ike.SecurityAssociation
-	var responseTrafficSelectorInitiator *ike.TrafficSelectorInitiator
-	var responseTrafficSelectorResponder *ike.TrafficSelectorResponder
-	var responseConfiguration *ike.Configuration
 
 	//requestIKEMessage := new(ike.IKEMessage)
 	n3iwfNASAddr := new(net.TCPAddr)

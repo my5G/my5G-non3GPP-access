@@ -2,10 +2,10 @@ package logger
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"runtime"
 	"strings"
-	"github.com/sirupsen/logrus"
 )
 
 var log *logrus.Logger

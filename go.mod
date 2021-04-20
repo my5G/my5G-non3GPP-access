@@ -8,12 +8,13 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/calee0219/fatal v0.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/free5gc/idgenerator v1.0.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.22.5
 	github.com/vishvananda/netlink v1.1.0
 	github.com/wmnsk/go-gtp v0.7.4
