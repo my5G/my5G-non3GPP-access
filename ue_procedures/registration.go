@@ -339,7 +339,8 @@ func buildEAP5GANParameters() []byte {
 
 	// Build NSSAI
 	anParameter = make([]byte, 2)
-	nssai := make([]byte, 2)
+	var nssai []byte
+
 	snssai := make([]byte, 5)
 	snssai[0] = 4
 	snssai[1] = 1
