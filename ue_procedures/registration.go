@@ -1310,7 +1310,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	pingLog.Infoln("Keep proccess active for 5 hours...")
-	time.Sleep(5 * time.Hour)
+	time.Sleep(200 * time.Hour)
 }
 
 func setUESecurityCapability(ue *UeRanContext) (UESecurityCapability *nasType.UESecurityCapability) {
