@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"free5gc/src/ue/logger"
-	//"github.com/sparrc/go-ping"
+	"github.com/sparrc/go-ping"
 	//"github.com/stretchr/testify/assert"
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
@@ -302,13 +302,13 @@ func buildEAP5GANParameters() []byte {
 
 	// Build GUAMI
 	anParameter := make([]byte, 2)
-	guami := make([]byte, 6) // new guami length for free5gc v3.0.5
-	guami[0] = 0x02
-	guami[1] = 0xf8
-	guami[2] = 0x39
-	guami[3] = 0xca
-	guami[4] = 0xfe
-	guami[5] = 0x0
+	guami := make([]byte, 7)
+	guami[1] = 0x02
+	guami[2] = 0xf8
+	guami[3] = 0x39
+	guami[4] = 0xca
+	guami[5] = 0xfe
+	guami[6] = 0x0
 	anParameter[0] = message.ANParametersTypeGUAMI
 	anParameter[1] = byte(len(guami))
 	anParameter = append(anParameter, guami...)
@@ -317,8 +317,8 @@ func buildEAP5GANParameters() []byte {
 
 	// Build Establishment Cause
 	anParameter = make([]byte, 2)
-	establishmentCause := make([]byte, 1)
-	establishmentCause[0] = message.EstablishmentCauseMO_Data
+	establishmentCause := make([]byte, 2)
+	establishmentCause[1] = message.EstablishmentCauseMO_Data
 	anParameter[0] = message.ANParametersTypeEstablishmentCause
 	anParameter[1] = byte(len(establishmentCause))
 	anParameter = append(anParameter, establishmentCause...)
@@ -327,10 +327,11 @@ func buildEAP5GANParameters() []byte {
 
 	// Build PLMN ID
 	anParameter = make([]byte, 2)
-	plmnID := make([]byte, 3)
-	plmnID[0] = 0x02
-	plmnID[1] = 0xf8
-	plmnID[2] = 0x39
+	plmnID := make([]byte, 5)
+	plmnID[1] = 3
+	plmnID[2] = 0x02
+	plmnID[3] = 0xf8
+	plmnID[4] = 0x39
 	anParameter[0] = message.ANParametersTypeSelectedPLMNID
 	anParameter[1] = byte(len(plmnID))
 	anParameter = append(anParameter, plmnID...)
@@ -339,22 +340,22 @@ func buildEAP5GANParameters() []byte {
 
 	// Build NSSAI
 	anParameter = make([]byte, 2)
-	var nssai []byte
-
-	snssai := make([]byte, 5)
-	snssai[0] = 4
-	snssai[1] = 1
-	snssai[2] = 0x01
-	snssai[3] = 0x02
-	snssai[4] = 0x03
+	nssai := make([]byte, 2)
+	snssai := make([]byte, 6)
+	snssai[1] = 4
+	snssai[2] = 1
+	snssai[3] = 0x01
+	snssai[4] = 0x02
+	snssai[5] = 0x03
 	nssai = append(nssai, snssai...)
-	snssai = make([]byte, 5)
-	snssai[0] = 4
-	snssai[1] = 1
-	snssai[2] = 0x11
-	snssai[3] = 0x22
-	snssai[4] = 0x33
+	snssai = make([]byte, 6)
+	snssai[1] = 4
+	snssai[2] = 1
+	snssai[3] = 0x11
+	snssai[4] = 0x22
+	snssai[5] = 0x33
 	nssai = append(nssai, snssai...)
+	nssai[1] = 12
 	anParameter[0] = message.ANParametersTypeRequestedNSSAI
 	anParameter[1] = byte(len(nssai))
 	anParameter = append(anParameter, nssai...)
@@ -1271,8 +1272,46 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		_ = netlink.LinkDel(linkGRE)
 	}()
 
+	// Ping remote
+	pinger, err := ping.NewPinger("60.60.0.101")
+	if err != nil {
+		pingLog.Fatal(err)
+	}
+
+	// Run with root
+	pinger.SetPrivileged(true)
+
+	pinger.OnRecv = func(pkt *ping.Packet) {
+		pingLog.Infof("%d bytes from %s: icmp_seq=%d time=%v\n",
+			pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt)
+	}
+	pinger.OnFinish = func(stats *ping.Statistics) {
+		pingLog.Infof("\n--- %s ping statistics ---\n", stats.Addr)
+		pingLog.Infof("%d packets transmitted, %d packets received, %v%% packet loss\n",
+			stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss)
+		pingLog.Infof("round-trip min/avg/max/stddev = %v/%v/%v/%v\n",
+			stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
+	}
+
+	pinger.Count = 5
+	pinger.Timeout = 10 * time.Second
+	pinger.Source = "60.60.0.1"
+
+	time.Sleep(3 * time.Second)
+
+	pinger.Run()
+
+	time.Sleep(1 * time.Second)
+
+	stats := pinger.Statistics()
+	if stats.PacketsSent != stats.PacketsRecv {
+		pingLog.Fatal("Ping Failed")
+	}else{
+		pingLog.Infoln("Ping Succeed")
+	}
+
 	pingLog.Infoln("Keep proccess active for 5 hours...")
-	time.Sleep(200 * time.Hour)
+	time.Sleep(5 * time.Hour)
 }
 
 func setUESecurityCapability(ue *UeRanContext) (UESecurityCapability *nasType.UESecurityCapability) {
