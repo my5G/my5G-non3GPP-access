@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"free5gc/src/ue/logger"
-	"github.com/sparrc/go-ping"
+	//"github.com/sparrc/go-ping"
 	//"github.com/stretchr/testify/assert"
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
@@ -1272,46 +1272,10 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		_ = netlink.LinkDel(linkGRE)
 	}()
 
-	// Ping remote
-	pinger, err := ping.NewPinger("60.60.0.101")
-	if err != nil {
-		pingLog.Fatal(err)
-	}
-
-	// Run with root
-	pinger.SetPrivileged(true)
-
-	pinger.OnRecv = func(pkt *ping.Packet) {
-		pingLog.Infof("%d bytes from %s: icmp_seq=%d time=%v\n",
-			pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt)
-	}
-	pinger.OnFinish = func(stats *ping.Statistics) {
-		pingLog.Infof("\n--- %s ping statistics ---\n", stats.Addr)
-		pingLog.Infof("%d packets transmitted, %d packets received, %v%% packet loss\n",
-			stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss)
-		pingLog.Infof("round-trip min/avg/max/stddev = %v/%v/%v/%v\n",
-			stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
-	}
-
-	pinger.Count = 5
-	pinger.Timeout = 10 * time.Second
-	pinger.Source = "60.60.0.1"
-
-	time.Sleep(3 * time.Second)
-
-	pinger.Run()
-
 	time.Sleep(1 * time.Second)
 
-	stats := pinger.Statistics()
-	if stats.PacketsSent != stats.PacketsRecv {
-		pingLog.Fatal("Ping Failed")
-	}else{
-		pingLog.Infoln("Ping Succeed")
-	}
-
 	pingLog.Infoln("Keep proccess active for 5 hours...")
-	time.Sleep(5 * time.Hour)
+	time.Sleep(200 * time.Hour)
 }
 
 func setUESecurityCapability(ue *UeRanContext) (UESecurityCapability *nasType.UESecurityCapability) {
