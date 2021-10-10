@@ -98,6 +98,9 @@ type UEContext struct {
 	AuthenticationMethod models.AuthMethod
 	OpcType string
 	Opc string
+	PDUSessionID uint8
+	GREIPAddress string
+
 }
 
 func InitUeContext(){

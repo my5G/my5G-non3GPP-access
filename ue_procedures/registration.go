@@ -529,8 +529,14 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 	udpConnection := setupUDPSocket(ueContext, pingLog)
 
+
+	newSPI , err := NewIKESecurityAssociation()
+	if err != nil {
+		pingLog.Fatal(err)
+	}
+	
 	// IKE_SA_INIT
-	ikeMessage := message.BuildIKEHeader(123123, 0, message.IKE_SA_INIT, message.InitiatorBitCheck, 0)
+	ikeMessage := message.BuildIKEHeader(newSPI, 0, message.IKE_SA_INIT, message.InitiatorBitCheck, 0)
 
 	// Security Association
 	proposal := message.BuildProposal(1, message.TypeIKE, nil)
@@ -609,7 +615,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	ikeSecurityAssociation := &context.IKESecurityAssociation{
-		LocalSPI:               123123,
+		LocalSPI:               newSPI,
 		RemoteSPI:              ikeMessage.ResponderSPI,
 		EncryptionAlgorithm:    encryptTransform,
 		IntegrityAlgorithm:     integrityTransform,
@@ -624,7 +630,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 1)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 1)
 
 	var ikePayload []message.IKEPayloadType
 
@@ -700,7 +706,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 2)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 2)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -791,7 +797,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	pdu := nasTestpacket.GetAuthenticationResponse(resStat, "")
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 3)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 3)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -861,7 +867,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	//assert.Nil(t, err)
 
 	// IKE_AUTH - EAP exchange
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 4)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 4)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -921,7 +927,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	}
 
 	// IKE_AUTH - Authentication
-	ikeMessage = message.BuildIKEHeader(123123, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 5)
+	ikeMessage = message.BuildIKEHeader(newSPI, ikeSecurityAssociation.RemoteSPI, message.IKE_AUTH, message.InitiatorBitCheck, 5)
 
 	ikePayload = []message.IKEPayloadType{}
 
@@ -1099,7 +1105,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		Sst: 1,
 		Sd:  "010203",
 	}
-	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(10, nasMessage.ULNASTransportRequestTypeInitialRequest, "internet", &sNssai)
+	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(ueContext.PDUSessionID, nasMessage.ULNASTransportRequestTypeInitialRequest, "internet", &sNssai)
 	pdu, err = EncodeNasPduWithSecurity(ue, pdu, nas.SecurityHeaderTypeIntegrityProtectedAndCiphered, true, false)
 	if err != nil {
 		pingLog.Fatal(err)
@@ -1242,9 +1248,12 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		pingLog.Fatal("No link named gretun0")
 	}
 	// Link address 60.60.0.1/24
+
+	ipv4 := net.ParseIP(ueContext.GREIPAddress)
+	//ipv4 := net.IP{}
 	linkGREAddr := &netlink.Addr{
 		IPNet: &net.IPNet{
-			IP:   net.IPv4(60, 60, 0, 1),
+			IP:   ipv4,
 			Mask: net.IPv4Mask(255, 255, 255, 255),
 		},
 	}
