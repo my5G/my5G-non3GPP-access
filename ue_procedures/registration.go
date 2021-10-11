@@ -518,9 +518,18 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	//ue := NewUeRanContext("imsi-2089300007487", 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2)
 	ue.AmfUeNgapId = 1
 	ue.AuthenticationSubs = ueContext.GetAuthSubscription2()
+
 	mobileIdentity5GS := nasType.MobileIdentity5GS{
 		Len:    12, // suci
 		Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
+	}
+
+	if ueContext.SUPIorSUCI == "imsi-2089300007486" {
+		mobileIdentity5GS = nasType.MobileIdentity5GS{
+			Len:    12, // suci
+			Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x47, 0x68},
+		}
+
 	}
 
 	n3iwfUDPAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:500", ueContext.N3IWFIpAddress))
