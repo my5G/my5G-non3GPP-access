@@ -98,6 +98,7 @@ type UEContext struct {
 	AuthenticationMethod models.AuthMethod
 	OpcType string
 	Opc string
+	Dnn string
 	PDUSessionID uint8
 	GREIPAddress string
 

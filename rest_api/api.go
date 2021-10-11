@@ -18,6 +18,7 @@ type RegistrationData struct {
 	Opc          		string `json:"opc" yaml:"opc" bson:"opc" mapstructure:"Opc"`
 	PlmnId           	string `json:"plmnid" yaml:"plmnid" bson:"plmnid" mapstructure:"plmnid"`
 	ServingNetworkName  string `json:"servingNetworkName" yaml:"servingNetworkName" bson:"servingNetworkName" mapstructure:"ServingNetworkName"`
+	Dnn                 string `json:"dnn" yaml:"dnn" bson:"dnn" mapstructure:"dnn"`
 	N3IWFIpAddress		string `json:"n3IWFIpAddress" yaml:"n3IWFIpAddress" bson:"n3IWFIpAddress" mapstructure:"N3IWFIpAddress"`
 	SNssai				*models.Snssai `json:"SNssai" yaml:"SNssai" bson:"SNssai" mapstructure:"SNssai"`
 	IKEBindAddress		string `json:"ikeBindAddress" yaml:"ikeBindAddress" bson:"ikeBindAddress" mapstructure:"IKEBindAddress"`
@@ -59,7 +60,7 @@ func Registration(c *gin.Context) {
 	ctx.N3IWFIpAddress = regData.N3IWFIpAddress
 	ctx.IKEBindAddress = regData.IKEBindAddress
 	ctx.SNssai = regData.SNssai
-
+	ctx.Dnn = regData.Dnn
 	ctx.PDUSessionID = regData.PDUSessionID
 	ctx.GREIPAddress = regData.GREAddress
 	// if

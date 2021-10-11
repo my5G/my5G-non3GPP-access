@@ -1105,7 +1105,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		Sst: 1,
 		Sd:  "010203",
 	}
-	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(ueContext.PDUSessionID, nasMessage.ULNASTransportRequestTypeInitialRequest, "internet", &sNssai)
+	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(ueContext.PDUSessionID, nasMessage.ULNASTransportRequestTypeInitialRequest, ueContext.Dnn, &sNssai)
 	pdu, err = EncodeNasPduWithSecurity(ue, pdu, nas.SecurityHeaderTypeIntegrityProtectedAndCiphered, true, false)
 	if err != nil {
 		pingLog.Fatal(err)
