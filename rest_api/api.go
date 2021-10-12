@@ -22,7 +22,7 @@ type RegistrationData struct {
 	N3IWFIpAddress		string `json:"n3IWFIpAddress" yaml:"n3IWFIpAddress" bson:"n3IWFIpAddress" mapstructure:"N3IWFIpAddress"`
 	SNssai				*models.Snssai `json:"SNssai" yaml:"SNssai" bson:"SNssai" mapstructure:"SNssai"`
 	IKEBindAddress		string `json:"ikeBindAddress" yaml:"ikeBindAddress" bson:"ikeBindAddress" mapstructure:"IKEBindAddress"`
-	PDUSessionID 		uint8 `json:"PDUSessionID" yaml:"PDUSessionID" bson:"PDUSessionID" mapstructure:"PDUSessionID"`
+	PDUSessionID 		uint8 `json:"PDUSessionID,string" yaml:"PDUSessionID" bson:"PDUSessionID" mapstructure:"PDUSessionID"`
 	GREAddress          string `json:"GREAddress" yaml:"GREAddress" bson:"GREAddress" mapstructure:"GREAddress"`
 }
 
