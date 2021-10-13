@@ -543,6 +543,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	if err != nil {
 		pingLog.Fatal(err)
 	}
+	fmt.Printf("** SPI UE %d **", newSPI )
 	
 	// IKE_SA_INIT
 	ikeMessage := message.BuildIKEHeader(newSPI, 0, message.IKE_SA_INIT, message.InitiatorBitCheck, 0)
