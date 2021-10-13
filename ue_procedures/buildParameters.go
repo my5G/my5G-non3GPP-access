@@ -3,6 +3,7 @@ package ue_procedures
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
 	"math"
 	"math/big"
@@ -18,6 +19,8 @@ func  NewIKESecurityAssociation() (uint64, error) {
 		return 0, errors.New("Error occurs when generate new IKE SPI")
 	}
 	localSPIuint64 = localSPI.Uint64()
+
+	fmt.Printf("\n\n***************************** SPI UE %d ******************************************** \n\n", localSPIuint64 )
 
 	return localSPIuint64, nil
 }
