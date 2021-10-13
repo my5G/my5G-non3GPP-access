@@ -22,5 +22,5 @@ func  NewIKESecurityAssociation() (uint64, error) {
 
 	fmt.Printf("\n\n***************************** SPI UE %d ******************************************** \n\n", localSPIuint64 )
 
-	return localSPIuint64, nil
+	return 123123, nil
 }
