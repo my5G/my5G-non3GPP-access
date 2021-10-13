@@ -514,7 +514,7 @@ func applyXFRMRule(ue_is_initiator bool, childSecurityAssociation *context.Child
 
 func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	// New UE
-	ue := NewUeRanContext(fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI), 1, security.AlgCiphering128NEA0, security.AlgCiphering128NEA0)
+	ue := NewUeRanContext(fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI), 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA0)
 	//ue := NewUeRanContext("imsi-2089300007487", 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2)
 	ue.AmfUeNgapId = 1
 	ue.AuthenticationSubs = ueContext.GetAuthSubscription2()
