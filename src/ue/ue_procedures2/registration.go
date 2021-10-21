@@ -549,9 +549,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	ue := NewRanUeContext( fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI) , 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2,
 		models.AccessType_NON_3_GPP_ACCESS)
 
-
-
-
+	var UE string
 	var mobileIdentity5GS nasType.MobileIdentity5GS
 
 	if fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI) == "imsi-2089300007486" {
@@ -562,6 +560,8 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		ue.AuthenticationSubs = getAuthSubscription2()
 		ue.AmfUeNgapId = 2
 
+		UE = "eu"
+
 	} else {
 		mobileIdentity5GS = nasType.MobileIdentity5GS{
 			Len:    12, // suci
@@ -569,6 +569,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		}
 		ue.AuthenticationSubs = getAuthSubscription()
 		ue.AmfUeNgapId = 1
+		UE = "ue"
 	}
 
 
@@ -684,8 +685,9 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 
 	var ikePayload message.IKEPayloadContainer
 
+
 	// Identification
-	ikePayload.BuildIdentificationInitiator(message.ID_FQDN, []byte("UE"))
+	ikePayload.BuildIdentificationInitiator(message.ID_FQDN, []byte(UE))
 
 	// Security Association
 	securityAssociation = ikePayload.BuildSecurityAssociation()
