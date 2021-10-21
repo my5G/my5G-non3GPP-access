@@ -548,7 +548,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 	// New UE
 	ue := NewRanUeContext( fmt.Sprintf("imsi-%s", ueContext.SUPIorSUCI) , 1, security.AlgCiphering128NEA0, security.AlgIntegrity128NIA2,
 		models.AccessType_NON_3_GPP_ACCESS)
-	ue.AmfUeNgapId = 1
+
 
 
 
@@ -559,15 +559,16 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 			Len:    12, // suci
 			Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x47, 0x68},
 		}
-		ue.AuthenticationSubs = getAuthSubscription()
+		ue.AuthenticationSubs = getAuthSubscription2()
+		ue.AmfUeNgapId = 2
 
 	} else {
 		mobileIdentity5GS = nasType.MobileIdentity5GS{
 			Len:    12, // suci
 			Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0xff, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
 		}
-		ue.AuthenticationSubs = getAuthSubscription2()
-
+		ue.AuthenticationSubs = getAuthSubscription()
+		ue.AmfUeNgapId = 1
 	}
 
 
