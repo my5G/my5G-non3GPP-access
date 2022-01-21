@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"free5gc/src/ue/logger"
+	ue_procedures "free5gc/src/ue/ue_actions"
 	"free5gc/src/ue/ue_handler/ue_message"
-	ue_procedures "free5gc/src/ue/ue_procedures2"
 )
 
 var handlerLog *logrus.Entry
@@ -26,15 +26,15 @@ func Handle() {
 				switch msg.Event {
 				case ue_message.EventRegistrationProcedure:
 					handlerLog.Infof("Registration Procedure Triggered")
-					ueContext := ue_context.UE_Self()
+					ueContext := ue_context.UeSelf()
 					ue_procedures.HandleRegistrationProcedure(ueContext)
 				case ue_message.EventDeregistrationProcedure:
 					handlerLog.Infof("Start Deregistration Procedure")
-					ueContext := ue_context.UE_Self()
+					ueContext := ue_context.UeSelf()
 					ue_procedures.HandleDeregistrationProcedure(ueContext)
 				case ue_message.EventPDUSessionEstablishment:
 					handlerLog.Infof("Start Deregistration Procedure")
-					ueContext := ue_context.UE_Self()
+					ueContext := ue_context.UeSelf()
 					ue_procedures.SetupPDUSession(ueContext)
 				}
 			}

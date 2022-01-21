@@ -2,12 +2,11 @@ package ue_context
 
 import (
 	"crypto/rsa"
-	"free5gc/lib/CommonConsumerTestData/UDM/TestGenAuthData"
-	"free5gc/lib/ngap/ngapType"
-	"free5gc/lib/openapi/models"
 	"free5gc/src/ue/logger"
 	"free5gc/src/ue/version"
-	//"free5gc/src/ue/ue_procedures"
+	"github.com/free5gc/CommonConsumerTestData/UDM/TestGenAuthData"
+	"github.com/free5gc/ngap/ngapType"
+	"github.com/free5gc/openapi/models"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"golang.org/x/net/ipv4"
@@ -22,35 +21,35 @@ func init() {
 	contextLog = logger.ContextLog
 
 	// init context
-	UE_Self().UeId = "1"
-	UE_Self().CmState = models.CmState_IDLE
-	UE_Self().RmState = models.RmState_DEREGISTERED
+	UeSelf().UeId = "1"
+	UeSelf().CmState = models.CmState_IDLE
+	UeSelf().RmState = models.RmState_DEREGISTERED
 	// N3IWF FQDN
-	UE_Self().FQDN = ""
+	UeSelf().FQDN = ""
 	// Network interface mark for xfrm
-	UE_Self().Mark = 5
+	UeSelf().Mark = 5
 }
 
 type OpcType string
 
 // List of AuthMethod
 const (
-	OP OpcType  = "5G_AKA"
+	OP  OpcType = "5G_AKA"
 	OPc OpcType = "EAP_AKA_PRIME"
 )
 
 type UEContext struct {
-	Version 						 string
-	UeId                             string
-	HttpIPv4Address					 string
-	HttpIPv4Port					 int
+	Version         string
+	UeId            string
+	HttpIPv4Address string
+	HttpIPv4Port    int
 
-	GUAMI *ngapType.GUAMI // connected AMF global identifier TODO: Discutir
-	CmState models.CmState // usada no gerenciamento de conexão (interface de sinalização N1 entre UE e AMF) [IDLE|CONNECTED]
-	RmState models.RmState // usado no gerenciamento de registro do UE junto ao núcleo [REGISTERED|DEREGISTERED]
+	GUAMI   *ngapType.GUAMI // connected AMF global identifier TODO: Discutir
+	CmState models.CmState  // usada no gerenciamento de conexão (interface de sinalização N1 entre UE e AMF) [IDLE|CONNECTED]
+	RmState models.RmState  // usado no gerenciamento de registro do UE junto ao núcleo [REGISTERED|DEREGISTERED]
 
-	IKESA 		IKESecurityAssociation
-	ChildSA     ChildSecurityAssociation
+	IKESA   IKESecurityAssociation
+	ChildSA ChildSecurityAssociation
 
 	// Security and Authentication Data
 	//UeRanContext *ue_procedures.UeRanContext
@@ -60,8 +59,8 @@ type UEContext struct {
 
 	// security data
 	CertificateAuthority []byte
-	UECertificate     []byte
-	UEPrivateKey      *rsa.PrivateKey
+	UECertificate        []byte
+	UEPrivateKey         *rsa.PrivateKey
 
 	// Network interface mark for xfrm
 	Mark uint32
@@ -71,7 +70,7 @@ type UEContext struct {
 	IPSecGatewayAddress string
 	GREBindAddress      string
 	TCPPort             uint16
-	TCPConnection *net.TCPConn
+	TCPConnection       *net.TCPConn
 
 	// Tunnels
 	GRETunnel netlink.Link
@@ -88,23 +87,22 @@ type UEContext struct {
 	UeAuthenticationCtx *models.UeAuthenticationCtx
 
 	// TODO: #LABORA Include Network Slicing Selection Information??
-	SNssai           *models.Snssai
+	SNssai *models.Snssai
 	// TODO: #LABORA Include UE Configuration Information?? (Used in USIM)
 
-	N3IWFIpAddress	string
+	N3IWFIpAddress string
 
 	// data for registration procedure
-	PermanentKeyValue string
+	PermanentKeyValue    string
 	AuthenticationMethod models.AuthMethod
-	OpcType string
-	Opc string
-	Dnn string
-	PDUSessionID uint8
-	GREIPAddress string
-
+	OpcType              string
+	Opc                  string
+	Dnn                  string
+	PDUSessionID         uint8
+	GREIPAddress         string
 }
 
-func InitUeContext(){
+func InitUeContext() {
 	// TODO: #LABORA implement context initiation tasks here
 	// inicializa com valores default e tudo desregistrado
 	ueContext.Version = version.GetVersion()
@@ -116,8 +114,8 @@ func (context *UEContext) Reset() {
 	// TODO: #LABORA implement context reset here
 }
 
-// Create new UE context
-func UE_Self() *UEContext {
+// UeSelf Create new UE context
+func UeSelf() *UEContext {
 	return &ueContext
 }
 

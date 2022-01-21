@@ -3,14 +3,14 @@ package ue_service
 import (
 	"bufio"
 	"fmt"
-	"free5gc/lib/http2_util"
-	"free5gc/lib/path_util"
 	"free5gc/src/ue/factory"
 	"free5gc/src/ue/logger"
 	"free5gc/src/ue/rest_api"
 	"free5gc/src/ue/ue_context"
 	"free5gc/src/ue/ue_handler"
 	"free5gc/src/ue/ue_util"
+	"github.com/free5gc/http2_util"
+	"github.com/free5gc/path_util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ type UE struct{}
 
 type (
 	Config struct {
-		uecfg string
+		uecfg        string
 		ue_http_addr string
 		ue_http_port string
 	}
@@ -44,14 +44,13 @@ var ueCLi = []cli.Flag{
 		Usage: "ue config file",
 	},
 	cli.StringFlag{
-		Name: "ue_http_addr",
+		Name:  "ue_http_addr",
 		Usage: "ue http binding address",
 	},
 	cli.StringFlag{
-		Name: "ue_http_port",
+		Name:  "ue_http_port",
 		Usage: "ue http binding port",
 	},
-
 }
 
 var initLog *logrus.Entry
@@ -67,7 +66,7 @@ func (*UE) GetCliCmd() (flags []cli.Flag) {
 func (*UE) Initialize(c *cli.Context) {
 
 	config = Config{
-		uecfg: c.String("uecfg"),
+		uecfg:        c.String("uecfg"),
 		ue_http_addr: c.String("ue_http_addr"),
 		ue_http_port: c.String("ue_http_port"),
 	}
@@ -75,7 +74,7 @@ func (*UE) Initialize(c *cli.Context) {
 	fmt.Println(c.Args())
 
 	if config.uecfg != "" {
-		factory.InitConfigFactory(path_util.Gofree5gcPath(config.uecfg))
+		factory.InitConfigFactory(path_util.Free5gcPath(config.uecfg))
 	} else {
 		factory.InitConfigFactory(ue_util.DefaultUeConfigPath)
 	}
@@ -89,7 +88,7 @@ func (*UE) Initialize(c *cli.Context) {
 	}
 
 	// TODO: get these two variables from ue-iot-non3gpp config file
-	DebugLevel:= "info"
+	DebugLevel := "info"
 	ReportCaller := true
 
 	initLog.Traceln("UE debug level(string):", DebugLevel)
@@ -140,8 +139,8 @@ func (ue *UE) Start() {
 	go ue_handler.Handle()
 
 	addr := fmt.Sprintf("%s:%s",
-						factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Address,
-						factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Port)
+		factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Address,
+		factory.UeConfig.Configuration.UEConfiguration.HttpIPv4Port)
 
 	// handle terminate signal
 	signalChannel := make(chan os.Signal, 1)
