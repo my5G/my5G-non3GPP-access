@@ -7,7 +7,6 @@ import (
 	"free5gc/src/ue/logger"
 	"free5gc/src/ue/ue_context"
 	"free5gc/src/ue/ue_nas"
-	"github.com/free5gc/free5gc-stage-3/lib/nas/nasTestpacket"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
@@ -1167,7 +1166,7 @@ func InitialRegistrationProcedure(ueContext *ue_context.UEContext) {
 		Sd:  "010203",
 	}
 	// TODO: why is this placed in the initial registration? Should be in the PDU session initializing func
-	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(ueContext.PDUSessionID, nasMessage.ULNASTransportRequestTypeInitialRequest, ueContext.Dnn, &sNssai)
+	pdu = ue_nas.ULNASTransportPDUSessionEstablishmentRequest(ueContext.PDUSessionID, nasMessage.ULNASTransportRequestTypeInitialRequest, ueContext.Dnn, &sNssai)
 	pdu, err = EncodeNasPduWithSecurity(ue, pdu, nas.SecurityHeaderTypeIntegrityProtectedAndCiphered, true, false)
 	if err != nil {
 		pingLog.Fatal(err)
